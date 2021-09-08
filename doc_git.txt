@@ -3,5 +3,9 @@ Cuando el repositorio es nuevo (https://git-scm.com)
     git add .
     git commit -m 'Cambios que realice'
     git branch -M main
-    git add remote origin ruta_repositorio
+    git remote add origin ruta_repositorio
     git push -u origin main
+Cuando hacemos cambios sobre el repositorio
+    git add .
+    git commit -m 'Cambios que realice'
+    git push
