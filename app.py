@@ -1,5 +1,7 @@
 from flask import Flask, json, jsonify, request
+from flask_cors import CORS
 import mysql.connector
+from flask_jwt_extended import create_access_token, JWTManager, jwt_required, get_jwt_identity
 
 db = mysql.connector.connect(
     host='localhost',
@@ -10,6 +12,32 @@ db = mysql.connector.connect(
 )
 
 app = Flask(__name__)
+CORS(app)
+app.config["JWT_SECRET_KEY"] = "ROSCerVALEvinstOmenTrideankLeaRm"
+jwt = JWTManager(app)
+
+@app.post('/login')
+def login():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+
+    cursor = db.cursor(dictionary=True, buffered=True)
+
+    cursor.execute('''select * from usuarios 
+        where email = %s and contrasena = %s ''', (email, password,))
+
+    usuario = cursor.fetchone()
+
+    if not usuario:
+        return jsonify({
+            "message": "Datos de acceso invalidos"
+        })
+    
+    token = create_access_token(identity=usuario['id'])
+
+    return jsonify({
+        "token": token
+    })
 
 @app.route('/')
 def index():
@@ -23,9 +51,10 @@ def crearUsuario():
     
     cursor = db.cursor()
     
-    cursor.execute('''INSERT INTO usuario(nombres, email, contrasena) 
-        VALUE(%s, %s, %s)''', (
+    cursor.execute('''INSERT INTO usuarios(nombres, apellidos, email, contrasena) 
+        VALUE(%s, %s, %s, %s)''', (
         datos['nombres'],
+        datos['apellidos'],
         datos['email'],
         datos['contrasena'],
     ))
@@ -37,10 +66,13 @@ def crearUsuario():
     })
 
 @app.get('/usuarios')
+@jwt_required()
 def listarUsuarios():
+    usuario = get_jwt_identity()
+    print(usuario)
     cursor = db.cursor(dictionary=True)
 
-    cursor.execute('select * from usuario')
+    cursor.execute('select * from usuarios')
 
     usuarios = cursor.fetchall()
 

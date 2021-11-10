@@ -3,6 +3,7 @@ Content-Type: application/json
 
 {
    "nombres": "Jeyson",
+   "apellidos": "Jeyson",
    "email": "jeison130@gmail.com",
    "contrasena": "12345678" 
 }
